@@ -17,6 +17,9 @@
       ]
     }
   },
+  "remoteEnv": {
+    "PULSE_SERVER": "host.docker.internal"
+  },
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
