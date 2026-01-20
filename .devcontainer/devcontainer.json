@@ -6,10 +6,8 @@
   },
   "remoteUser": "root",
   "mounts": [
-    "source=${localWorkspaceFolder},target=/app,type=bind",
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
   ],
-  "workspaceFolder": "/app",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -21,5 +19,6 @@
   },
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
-  }
+  },
+  "postStartCommand": "pip install -r /workspaces/node/requirements/dev.txt"
 }
