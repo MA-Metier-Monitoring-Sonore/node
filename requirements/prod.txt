@@ -1,1 +1,2 @@
 pyalsaaudio==0.11.0
+audioop-lts==0.2.2
