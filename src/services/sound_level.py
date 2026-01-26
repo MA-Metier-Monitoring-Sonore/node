@@ -31,7 +31,7 @@ class SoundLevel:
         rms = audioop.rms(data, self._sample_width)
         
         if rms <= 1:
-            return -90.0
+            return 0
 
         db = 20 * math.log10(rms / 32768) 
 
