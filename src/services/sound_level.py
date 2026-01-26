@@ -8,10 +8,10 @@ import src.config.config as config
 class SoundLevel:
 
     def __init__(self):
-        self.sample_width = config.SAMPLE_WIDTH
-        self.db_offset = config.DB_OFFSET
+        self._sample_width = config.SAMPLE_WIDTH
+        self._db_offset = config.DB_OFFSET
 
-        self.inp = alsaaudio.PCM(
+        self._inp = alsaaudio.PCM(
             alsaaudio.PCM_CAPTURE,
             alsaaudio.PCM_NORMAL,
             device=os.getenv("DEVICE"),
@@ -21,20 +21,20 @@ class SoundLevel:
             periodsize=config.PERIODSIZE,
         )
 
-    def _get(self):
+    def get(self):
         """Reading audio data from the microphone and convert in decibels"""
 
-        length, data = self.inp.read()
+        length, data = self._inp.read()
         if length == 0 or not data:
             return None
 
-        rms = audioop.rms(data, self.sample_width)
-        print("RMS:", rms)
+        rms = audioop.rms(data, self._sample_width)
+        
         if rms <= 1:
             return -90.0
 
         db = 20 * math.log10(rms / 32768) 
 
-        dbA = db + 1.7 + self.db_offset
+        dbA = db + 1.7 + self._db_offset
 
         return dbA

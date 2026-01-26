@@ -32,7 +32,7 @@ def publish():
     topic = "CH/Vaud/Ste-Croix/" + client_id + "/soundlevel"
     payload = {
         "client_id": client_id,
-        "soundlevel": soundLevel._get()
+        "soundlevel": soundLevel.get()
     }
     client.publish(topic, json.dumps(payload), qos=1, retain=True)
     threading.Timer(1, publish).start()
