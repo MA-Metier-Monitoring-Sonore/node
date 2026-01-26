@@ -21,7 +21,7 @@ class SoundLevel:
             periodsize=config.PERIODSIZE,
         )
 
-    def get_dbA(self):
+    def _get(self):
         """Reading audio data from the microphone and convert in decibels"""
 
         length, data = self.inp.read()
