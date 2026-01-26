@@ -3,21 +3,22 @@ import audioop
 import math
 import time
 
+import config
+
 class SoundLevel:
 
     def __init__(self):
-        self.sample_width = 2
-        self.db_offset = 100
+        self.sample_width = config.SAMPLE_WIDTH
+        self.db_offset = config.DB_OFFSET
 
-        # Open the audio input stream
         self.inp = alsaaudio.PCM(
             alsaaudio.PCM_CAPTURE,
             alsaaudio.PCM_NORMAL,
-            device='pulse',
-            channels=1,
-            rate=48000,
+            device=config.DEVICE,
+            channels=config.CHANNELS,
+            rate=config.RATE,
             format=alsaaudio.PCM_FORMAT_S16_LE,
-            periodsize=256,
+            periodsize=config.PERIODSIZE,
         )
 
     def read_dbA(self):
