@@ -1,9 +1,9 @@
 import alsaaudio
 import audioop
 import math
-import time
+import os
 
-import config
+import src.config.config as config
 
 class SoundLevel:
 
@@ -14,14 +14,14 @@ class SoundLevel:
         self.inp = alsaaudio.PCM(
             alsaaudio.PCM_CAPTURE,
             alsaaudio.PCM_NORMAL,
-            device=config.DEVICE,
+            device=os.getenv("DEVICE"),
             channels=config.CHANNELS,
             rate=config.RATE,
             format=alsaaudio.PCM_FORMAT_S16_LE,
             periodsize=config.PERIODSIZE,
         )
 
-    def read_dbA(self):
+    def get_dbA(self):
         """Reading audio data from the microphone and convert in decibels"""
 
         length, data = self.inp.read()
@@ -33,26 +33,8 @@ class SoundLevel:
         if rms <= 1:
             return -90.0
 
-        # dB brut 
         db = 20 * math.log10(rms / 32768) 
 
-        # Pondération A simplifiée 
         dbA = db + 1.7 + self.db_offset
 
         return dbA
-
-
-    def get(self):
-        """Show decibels"""
-
-        try:
-            while True:
-                dbA = self.read_dbA()
-                if dbA is not None:
-                    print(f"Decibels : {dbA:.1f} dB")
-                time.sleep(0.1)
-        except KeyboardInterrupt:
-            print("Stopping the script.")
-
-if __name__ == "__main__":
-    SoundLevel().get()
