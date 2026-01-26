@@ -1,7 +1,7 @@
 """Logging utilities for the application."""
 
 import datetime
-from enums.log_level import LogLevel
+from src.enums.log_level import LogLevel
 
 class Logger:
     """Simple logger service."""
