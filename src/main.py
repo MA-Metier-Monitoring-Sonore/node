@@ -15,7 +15,7 @@ load_dotenv()
 client_id = socket.gethostname()
 broker_host = os.getenv("BROKER_HOST")
 broker_port = int(os.getenv("BROKER_PORT"))
-soundLevel = SoundLevel()
+sound_level = SoundLevel()
 
 def on_connect(*args, **kwargs):
     """Callback for when the client receives a CONNACK response from the server."""
@@ -32,7 +32,7 @@ def publish():
     topic = "CH/Vaud/Ste-Croix/" + client_id + "/soundlevel"
     payload = {
         "client_id": client_id,
-        "soundlevel": soundLevel.get()
+        "soundlevel": sound_level.get()
     }
     client.publish(topic, json.dumps(payload), qos=1, retain=True)
     threading.Timer(1, publish).start()
