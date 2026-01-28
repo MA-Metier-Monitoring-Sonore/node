@@ -3,7 +3,7 @@ import audioop
 import math
 import os
 
-import src.config.config as config
+import config.config as config
 
 class SoundLevel:
 

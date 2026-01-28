@@ -32,7 +32,9 @@ def publish():
     topic = "CH/Vaud/Ste-Croix/" + client_id + "/soundlevel"
     payload = {
         "client_id": client_id,
-        "soundlevel": soundLevel.get()
+        "soundlevel": soundLevel.get(),
+        "lon": os.getenv("DEVICE_LON"),
+        "lat": os.getenv("DEVICE_LAT"),
     }
     client.publish(topic, json.dumps(payload), qos=1, retain=True)
     threading.Timer(1, publish).start()
@@ -55,4 +57,4 @@ except OSError as e:
 
 publish()
 
-client.loop_forever(retry_first_connection=True)
+client.loop_forever()
