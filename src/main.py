@@ -1,10 +1,9 @@
 """Main module for MQTT client"""
-import threading
-import sys
+import asyncio
 import socket
 import os
 import json
-import paho.mqtt.client as mqtt
+import aiomqtt
 
 from dotenv import load_dotenv
 from services.logger import Logger
@@ -12,49 +11,36 @@ from services.sound_level import SoundLevel
 
 load_dotenv()
 
-client_id = socket.gethostname()
-broker_host = os.getenv("BROKER_HOST")
-broker_port = int(os.getenv("BROKER_PORT"))
-soundLevel = SoundLevel()
+CLIENT_ID = socket.gethostname()
+BROKER_HOST = os.getenv("BROKER_HOST")
+TOPIC = "CH/Vaud/Ste-Croix/" + CLIENT_ID + "/soundlevel"
 
-def on_connect(*args, **kwargs):
-    """Callback for when the client receives a CONNACK response from the server."""
-    Logger.info("Connected to Broker.")
+async def main():
+    """Main asynchronous function to handle MQTT connection and subscription."""
+    client = aiomqtt.Client(BROKER_HOST)
+    interval = 5
+    sound_level = SoundLevel()
 
-def on_connect_fail(*args, **kwargs):
-    """Callback for when the client fails to connect to the server."""
-    Logger.error(
-        "Connection failed to Broker. Check network connection and/or broker host and port configuration."
-    )
+    async with aiomqtt.Client(BROKER_HOST) as client:
+        Logger.info("Connected to MQTT broker")
 
-def publish():
-    """Publish a message every 1 seconds."""
-    topic = "CH/Vaud/Ste-Croix/" + client_id + "/soundlevel"
-    payload = {
-        "client_id": client_id,
-        "soundlevel": soundLevel.get(),
-        "lon": os.getenv("DEVICE_LON"),
-        "lat": os.getenv("DEVICE_LAT"),
-    }
-    client.publish(topic, json.dumps(payload), qos=1, retain=True)
-    threading.Timer(1, publish).start()
+        while True:
+            try:
+                await client.publish(
+                    TOPIC,
+                    json.dumps({
+                        "client_id": CLIENT_ID,
+                        "soundlevel": sound_level.get(),
+                        "lon": os.getenv("DEVICE_LON"),
+                        "lat": os.getenv("DEVICE_LAT"),
+                    }),
+                    qos=1,
+                    retain=True
+                )
+                await asyncio.sleep(1)
 
-client = mqtt.Client(
-    mqtt.CallbackAPIVersion.VERSION2,
-    client_id = client_id,
-    protocol = mqtt.MQTTv5
-)
-client.on_connect = on_connect
-client.on_connect_fail = on_connect_fail
+            except aiomqtt.MqttError:
+                Logger.error(f"Connection lost; Reconnecting in {interval} seconds ...")
+                await asyncio.sleep(interval)
 
-try:
-    client.connect(broker_host, broker_port, 60)
-except OSError as e:
-    Logger.critical(
-        "Could not connect to Broker. Check network connection and/or broker host and port configuration."
-    )
-    sys.exit()
-
-publish()
-
-client.loop_forever()
+asyncio.run(main())
