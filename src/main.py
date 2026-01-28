@@ -13,7 +13,9 @@ load_dotenv()
 
 CLIENT_ID = socket.gethostname()
 BROKER_HOST = os.getenv("BROKER_HOST")
-TOPIC = "CH/Vaud/Ste-Croix/" + CLIENT_ID + "/soundlevel"
+TOPIC = "CH/Vaud/Ste-Croix/" + CLIENT_ID
+TOPIC_CONFIG = TOPIC + "/config"
+TOPIC_SOUNDLEVEL = TOPIC + "/soundlevel"
 
 async def main():
     """Main asynchronous function to handle MQTT connection and subscription."""
@@ -24,23 +26,32 @@ async def main():
     async with aiomqtt.Client(BROKER_HOST) as client:
         Logger.info("Connected to MQTT broker")
 
+        await client.publish(
+            TOPIC_CONFIG,
+            json.dumps({
+                "lon": os.getenv("DEVICE_LON"),
+                "lat": os.getenv("DEVICE_LAT"),
+            }),
+            qos=1,
+            retain=True
+        )
+
         while True:
             try:
                 await client.publish(
-                    TOPIC,
+                    TOPIC_SOUNDLEVEL,
                     json.dumps({
-                        "client_id": CLIENT_ID,
-                        "soundlevel": sound_level.get(),
-                        "lon": os.getenv("DEVICE_LON"),
-                        "lat": os.getenv("DEVICE_LAT"),
-                    }),
-                    qos=1,
-                    retain=True
+                        "lvl": sound_level.get(),
+                    })
                 )
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.1)
 
             except aiomqtt.MqttError:
                 Logger.error(f"Connection lost; Reconnecting in {interval} seconds ...")
                 await asyncio.sleep(interval)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
